@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maternidad Esperanza</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#3B2A4A;--pink:#FF8FAB;--mint:#7BD5C2}
+*{box-sizing:border-box}
+html{font-size:clamp(16px,1.45vw,21px)}
+body{margin:0;min-height:100vh;background:linear-gradient(#FFE3EC,#DFF6F0);font-family:Fredoka,"Trebuchet MS",system-ui,sans-serif;color:var(--ink)}
+.wrap{max-width:min(1500px,98vw);margin:0 auto;padding:10px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border-radius:16px;padding:8px 14px;font-weight:700;box-shadow:0 3px 0 #F3C6D3}
+.tb{font:inherit;background:#FFF0F5;border:2px solid #F3C6D3;border-radius:10px;padding:2px 9px;cursor:pointer;margin-left:4px}
+#stage{position:relative;margin-top:10px}
+canvas{width:100%;aspect-ratio:800/460;display:block;border-radius:18px;border:4px solid #fff;box-shadow:0 4px 0 #F3C6D3;touch-action:none;background:#fff}
+#m{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(59,42,74,.5);border-radius:18px;padding:8px;overflow:auto}
+.hide{display:none!important}
+.row{display:flex;gap:14px;align-items:flex-start}
+.main{flex:1;min-width:0}
+.mom{width:9rem;flex:none;text-align:center;background:#FFF0F5;border:2px solid #F3C6D3;border-radius:16px;padding:10px 8px;position:sticky;top:0}
+.mst{font-size:.85rem;line-height:1.25}
+.mf{font-size:4.2rem;line-height:1.1;margin:6px 0;animation:tr .5s infinite alternate}
+@keyframes tr{from{transform:translateX(-1.5px) rotate(-2deg)}to{transform:translateX(1.5px) rotate(2deg)}}
+.mbb{font-size:.85rem;background:#fff;border:2px solid #FF8FAB;border-radius:12px;padding:6px 8px;opacity:0;transition:opacity .3s;min-height:4em}
+.mbb.on{opacity:1}
+@media(max-width:560px){.row{flex-direction:column}.mom{width:100%;display:flex;align-items:center;gap:8px;text-align:left}.mf{font-size:2.4rem;margin:0}.mbb{flex:1}}
+.box{background:#fff;border-radius:20px;padding:16px 18px;max-width:min(40rem,94%);width:100%;box-shadow:0 5px 0 #F3C6D3;max-height:100%;overflow:auto;animation:pop .2s}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+h3{margin:0 0 8px;font-size:1.3rem}
+.info{background:#FFF0F5;border-radius:12px;padding:8px 10px;margin-bottom:10px}
+.o,.go{display:block;width:100%;font:inherit;text-align:left;background:#F2FBF8;border:3px solid #BDE9DE;border-radius:14px;padding:10px 12px;margin:6px 0;cursor:pointer;color:var(--ink)}
+.o:hover:not(:disabled){background:#DFF6F0}
+.o:disabled{opacity:.55;cursor:not-allowed}
+.o.ok{background:#D7F5E1;border-color:#4CB56F;opacity:1}
+.o.bad{background:#FFE0E0;border-color:#E66}
+.go{background:var(--pink);border-color:#E0708F;color:#fff;text-align:center;font-weight:700;margin-top:10px}
+button:focus-visible{outline:3px solid #4D96FF;outline-offset:2px}
+.pads{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
+.pad{height:70px;border:4px solid #fff;border-radius:16px;opacity:.55;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.pad.on{opacity:1;transform:scale(1.08);box-shadow:0 0 18px #fff}
+#bar{position:relative;height:34px;background:#EEE;border-radius:17px;overflow:hidden;margin:14px 0}
+#zn{position:absolute;top:0;bottom:0;background:#6BCB77;opacity:.85}
+#mk{position:absolute;top:0;bottom:0;width:8px;background:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.cd{height:60px;font-size:30px;border-radius:12px;border:3px solid #fff;background:#CDB4DB;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.12)}
+.cd.ok{background:#D7F5E1}
+.arena{position:relative;height:150px;background:radial-gradient(circle at 50% 60%,#fff,#E9F7F3);border:3px dashed #BDE9DE;border-radius:18px;margin:10px 0;display:flex;align-items:center;justify-content:center}
+#pt{display:inline-block;font-size:78px}
+#ut{position:absolute;right:28%;top:12%;font-size:38px}
+.uz{animation:uz .7s}
+@keyframes uz{0%{transform:translate(50px,-30px) scale(.4);opacity:0}60%{transform:scale(1.3);opacity:1}}
+.sh{animation:sh .45s}
+@keyframes sh{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+.hp{animation:hp .5s}
+@keyframes hp{25%{transform:rotate(-12deg) scale(1.15)}75%{transform:rotate(12deg) scale(1.15)}}
+.tray{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+.tl{font-size:30px;width:58px;height:58px;border-radius:14px;border:3px solid #BDE9DE;background:#F2FBF8;cursor:pointer;touch-action:none;box-shadow:0 3px 0 rgba(0,0,0,.1)}
+.tl.used{background:#D7F5E1;border-color:#4CB56F}
+.fl{position:fixed;font-size:46px;pointer-events:none;transform:translate(-50%,-50%);z-index:99}
+.go:disabled{opacity:.5;cursor:not-allowed}
+#gd{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(59,42,74,.6);border-radius:18px;padding:8px;overflow:auto}
+#t{z-index:9;position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:#3B2A4A;color:#fff;padding:6px 14px;border-radius:14px;font-size:.9rem;pointer-events:none;white-space:nowrap}
+.help{font-size:.85rem;text-align:center;margin:8px 0 0}
+.dk{background:#2B2236;color:#fff}
+.dk .info{background:#3D3150}
+.nm{width:100%;font:inherit;padding:8px 10px;border:3px solid #BDE9DE;border-radius:12px;color:var(--ink)}
+
+/* ===== Rediseño de interfaz ===== */
+body{background:radial-gradient(circle at 15% 0%,#FFE3EE,transparent 55%),radial-gradient(circle at 90% 100%,#D3F4EA,transparent 50%),#FFF6FA;background-attachment:fixed}
+.hud{background:linear-gradient(135deg,#4A2C6B,#7B3F8F);color:#fff;border-radius:18px;box-shadow:0 4px 0 #2F1A45,0 10px 24px rgba(74,44,107,.25)}
+#h,#sc{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{background:rgba(255,255,255,.16);border-radius:999px;padding:3px 10px;font-size:.88rem;white-space:nowrap}
+.chip.hot{background:#FF8A3D;animation:pulse .6s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+.tb{background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);color:#fff}
+.tb:hover{background:rgba(255,255,255,.32)}
+#m{background:radial-gradient(circle at 50% 40%,rgba(59,42,74,.55),rgba(25,15,40,.82));backdrop-filter:blur(3px)}
+.box{padding:0;background:#FFFDFE;border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,.35),0 0 0 4px #fff;animation:rise .3s cubic-bezier(.2,1.3,.4,1)}
+@keyframes rise{from{transform:translateY(26px) scale(.95);opacity:0}}
+.bd{padding:14px 18px 6px}
+.band{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;color:#fff;position:sticky;top:0;z-index:2;border-radius:24px 24px 0 0}
+.band.sg{background:linear-gradient(135deg,#3FAE97,#7BD5C2)}
+.band.sr{background:linear-gradient(135deg,#D93A5B,#FF6B81)}
+.tag{background:#fff;color:#D93A5B;border-radius:8px;padding:1px 7px;font-size:.72rem;font-weight:700;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.45}}
+.stp{display:flex;gap:6px}
+.stp span{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.28);border-radius:999px;padding:2px 9px;font-size:.78rem;font-weight:700}
+.stp em{font-style:normal;display:none}
+.stp .on{background:#fff;color:#3B2A4A}
+.stp .on em{display:inline}
+.stp .dn{background:rgba(255,255,255,.65);color:#2E6B58}
+h3{font-size:1.45rem;color:#4A2C6B;margin:0 0 10px}
+.dk h3{color:#fff}
+.sub{font-size:.9rem;opacity:.8;margin:0 0 8px}
+.info{background:linear-gradient(#FFF3F8,#FFEAF2);border:2px solid #F9D2E0;border-radius:14px}
+.dk .info{border-color:#54446e}
+.go{border-radius:999px;box-shadow:0 5px 0 #C14E72;transition:transform .1s,box-shadow .1s;font-size:1.05rem}
+.go:hover:not(:disabled){transform:translateY(-2px)}
+.go:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #C14E72}
+.o{background:#fff;border:3px solid #E4D9F0;border-radius:16px;box-shadow:0 4px 0 #E4D9F0;transition:transform .12s,box-shadow .12s,background .12s}
+.o:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #D5C6EA;background:#FAF6FF}
+.o.ch{display:flex;align-items:center;gap:10px}
+.lt{flex:none;width:2rem;height:2rem;border-radius:50%;background:#4A2C6B;color:#fff;display:grid;place-items:center;font-weight:700}
+.o.ok{background:#E7F9EE;border-color:#4CB56F;box-shadow:0 4px 0 #4CB56F}
+.o.ok .lt{background:#4CB56F}
+.o.bad{background:#FFE9EC;border-color:#FF8A9B;box-shadow:0 4px 0 #FF8A9B;animation:sh .4s}
+.o.bad .lt{background:#E66}
+.fb{padding:0;margin:0;border-radius:14px;font-weight:600}
+.fb.fok{padding:10px 12px;margin:8px 0;background:#E7F9EE;border:2px solid #4CB56F}
+.fb.fno{padding:10px 12px;margin:8px 0;background:#FFE9EC;border:2px solid #FF8A9B}
+.mom{top:60px;background:linear-gradient(#FFF0F5,#FFE0EA)}
+.mbb{position:relative}
+.mbb::before{content:"";position:absolute;top:-8px;left:50%;margin-left:-6px;border:6px solid transparent;border-top:0;border-bottom-color:#FF8FAB}
+@media(max-width:560px){.mom{position:static}}
+.arena{background:linear-gradient(#EAF8F4 0 68%,#D4EEE6 68%);border:3px solid #BDE9DE;overflow:hidden}
+.arena::before{content:"";position:absolute;left:16%;right:16%;bottom:12px;height:36px;border-radius:14px;background:#fff;border:3px solid #C9B6E0;box-shadow:0 4px 0 #E4D9F0}
+#pt{position:relative;z-index:1;top:-8px}
+#ut{z-index:2}
+.tl.lab{width:5.1rem;height:auto;padding:6px 2px;font-size:28px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1}
+.tl.lab small{font-size:.62rem;font-weight:600;color:var(--ink)}
+.mon{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:8px;background:#1F1A2E;border-radius:16px;padding:10px;margin:8px 0;border:3px solid #3a3256}
+.ecgl{grid-column:1/-1;width:100%;height:30px}
+.ecgl polyline{fill:none;stroke:#52F2A6;stroke-width:2;stroke-dasharray:240;animation:ecg 2s linear infinite}
+@keyframes ecg{from{stroke-dashoffset:240}to{stroke-dashoffset:-240}}
+.ph{grid-column:1/-1;color:#9FB3C8;text-align:center;padding:6px;font-family:"Courier New",monospace}
+.vt{display:flex;gap:8px;align-items:flex-start;background:#2A2440;border-radius:10px;padding:8px;color:#fff;border-left:5px solid #4CB56F;animation:rise .25s}
+.vt.bad{border-left-color:#FF6B6B}
+.vt.note{border-left-color:#7BD5C2;grid-column:1/-1}
+.vt .vi{font-size:1.5rem}
+.vt b{display:block;font-size:.8rem;opacity:.85}
+.vv{display:block;font-size:1.3rem;font-weight:700;color:#7DF9C0;font-family:"Courier New",monospace}
+.vt.bad .vv{color:#FF8A8A;animation:blink 1s infinite}
+.vt small{display:block;font-size:.68rem;opacity:.7}
+.vq{display:block;font-size:.85rem}
+.vw{display:block;font-size:.78rem;font-weight:700;color:#FFB4B4}
+.vw.ok{color:#9DF2B8}
+.mon.sm{padding:6px}
+.mon.sm .ecgl{display:none}
+.fic{display:flex;gap:10px;align-items:center;background:#F6F1FF;border:2px solid #E1D6F5;border-radius:14px;padding:8px 10px;margin-bottom:10px}
+.fic .av{font-size:2.4rem}
+.fic small{display:block;opacity:.85}
+.fic .vs{font-family:"Courier New",monospace;color:#2E6B58;font-weight:700}
+.hero{text-align:center;padding:4px 0}
+.logo{font-size:2.6rem}
+.hero h1{margin:4px 0;font-size:1.9rem;background:linear-gradient(90deg,#E0508A,#6B4BC4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{text-align:center}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0 10px}
+.flow div{background:#F6F1FF;border-radius:12px;text-align:center;padding:8px 2px 4px;font-size:1.5rem;position:relative}
+.flow b{position:absolute;top:-6px;left:-4px;background:#4A2C6B;color:#fff;border-radius:50%;width:1.2rem;height:1.2rem;font-size:.7rem;display:grid;place-items:center}
+.flow span{display:block;font-size:.66rem;font-weight:600}
+.rules{font-size:.85rem;text-align:center;background:#FFF3F8;border-radius:12px;padding:8px}
+.rec{text-align:center}
+.note{font-size:.72rem;opacity:.7;text-align:center}
+.vt{text-align:left}
+.box.dk{background:#2B2236;color:#fff}
+.dk .vq,.dk p,.dk small{color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hud"><span>🏥 Nivel <b id="lv">1</b></span><span id="h"></span><span id="sc"></span><span id="tk">⏱️ 0:00</span><span><button class="tb" id="bg" title="Guía rápida">📖</button><button class="tb" id="bs" title="Tienda">🛒</button><button class="tb" id="bt" title="Reloj (T)">⏳</button><button class="tb" id="bm" title="Música">🎵</button></span></div>
+  <div id="stage">
+    <canvas id="cv" width="800" height="460" aria-label="Mapa del hospital"></canvas>
+    <div id="t" class="hide"></div>
+    <div id="m" class="hide"></div>
+    <div id="gd" class="hide"></div>
+  </div>
+  <p class="help">Muévete con WASD o flechas, o toca el mapa. E o toca a una paciente para atenderla. T usa el reloj ⏳. 📖 abre la guía de valores normales.</p>
+  <p class="help">Juego con fines educativos. No sustituye la formación ni el criterio clínico profesional.</p>
+</div>
+<script>
+const C=(l,room,n,cond,v,d,df,t,tf,w)=>({l,room,n,cond,v,d,df,t,tf,w});
+const LV=["Control y parto","Primeras complicaciones","Emergencias","Alto riesgo","Código rojo"];
+const CASES=[
+C(1,0,"Control prenatal","28 semanas, control de rutina, sin molestias.","PA 110/70 · FC 78 · FCF 145",["Embarazo normal","Preeclampsia","Parto prematuro"],"A las 24-28 semanas toca tamizaje de diabetes.",["Tamizaje y suplementos","Reposo absoluto","Cesárea programada"],"Un embarazo normal necesita controles, no reposo ni cesárea.",["Detecta diabetes gestacional y aporta hierro y ácido fólico.", "Reduce la actividad; un embarazo normal no lo necesita.", "Cirugía mayor; solo se indica si hay una razón obstétrica."]),
+C(1,1,"Trabajo de parto","39 semanas, 4 contracciones en 10 min, dilatación 6 cm.","PA 115/72 · FC 88 · FCF 140",["Fase activa del parto","Fase latente","Expulsivo"],"Con 6 cm y buena dinámica es fase activa.",["Partograma y vigilar FCF","Pujar desde ya","Cesárea inmediata"],"Se vigila el avance con partograma; se puja solo en el expulsivo.",["Registra el avance de la dilatación y el bienestar del bebé.", "Pujar con 6 cm cansa a la madre y puede hinchar el cuello uterino.", "Cirugía urgente; aquí el parto avanza bien."]),
+C(1,0,"Anemia en el embarazo","26 semanas, cansancio y palidez. Hb 9 g/dl.","PA 105/65 · FC 98 · FCF 148 · Hb 9",["Anemia gestacional","Preeclampsia","Embarazo normal"],"Hb menor de 11 g/dl en el embarazo es anemia.",["Hierro y ácido fólico","Solo reposo","Antibióticos"],"Se da hierro y ácido fólico y se controla la Hb.",["Reponen la hemoglobina y ayudan al desarrollo del bebé.", "Descansar no corrige la falta de hierro.", "Tratan infecciones, no la anemia."]),
+C(2,0,"Diabetes gestacional","30 semanas, glucosa alta pese a dieta y ejercicio.","PA 120/78 · FC 84 · Glucosa 105",["Diabetes sin control con dieta","Preeclampsia","Embarazo normal"],"Si la dieta no basta, hay que escalar el tratamiento.",["Insulina y control de glucosa","Quitar todos los carbohidratos","Inducir el parto ya"],"Si falla la dieta se inicia insulina.",["Baja la glucosa cuando la dieta no alcanza.", "Una dieta tan estricta daña a la madre y al bebé.", "A las 30 semanas el bebé nacería prematuro."]),
+C(2,0,"Infección urinaria","24 semanas, ardor al orinar y fiebre.","PA 108/66 · FC 102 · Temp 38.5",["Infección urinaria","Embarazo normal","Parto prematuro"],"Ardor y fiebre indican infección urinaria.",["Antibiótico y líquidos","Solo paracetamol","Cesárea"],"Se trata con antibiótico para evitar complicaciones.",["Elimina la bacteria y evita que suba al riñón.", "Baja la fiebre pero no cura la infección.", "No tiene relación con una infección urinaria."]),
+C(2,0,"Preeclampsia severa","34 semanas, dolor de cabeza fuerte, luces en la vista, proteinuria 2+.","PA 170/112 · FC 96 · FCF 150 · Prot 3",["Preeclampsia severa","Hipertensión de bata blanca","Diabetes gestacional"],"Presión muy alta con síntomas es severidad.",["Sulfato de magnesio y bajar la PA","Dieta sin sal y alta","Diuréticos"],"El magnesio previene la eclampsia y se controla la presión.",["Previene convulsiones y protege de un derrame cerebral.", "Es muy poco para una presión de 170/112.", "Pueden restar volumen de sangre a la placenta."]),
+C(3,1,"Hemorragia posparto","Sangrado de 1000 ml tras el parto, útero blando, palidez.","PA 90/55 · FC 124",["Atonía uterina","Desgarro leve","Retención de líquidos"],"Útero blando con mucho sangrado es atonía.",["Masaje, oxitocina y suero","Esperar a que pare","Mandarla a casa"],"Masaje uterino, oxitocina y reponer volumen sin demora.",["Contrae el útero y repone el volumen perdido.", "El sangrado puede ser mortal en minutos.", "Necesita vigilancia y tratamiento inmediato."]),
+C(3,1,"Sufrimiento fetal","40 semanas, desaceleraciones tardías y líquido meconial.","PA 118/76 · FC 100 · FCF 90",["Sufrimiento fetal agudo","Contracciones normales","Rotura simple"],"FCF baja y desaceleraciones tardías indican hipoxia.",["Lado izquierdo, oxígeno y parto urgente","Subir la oxitocina","Esperar una hora"],"Se mejora la oxigenación y se prepara el parto urgente.",["Mejora el flujo al bebé y prepara su nacimiento rápido.", "Más contracciones le quitan más oxígeno al bebé.", "El bebé no tiene una hora de reserva."]),
+C(3,0,"Rotura de membranas","33 semanas, sale líquido por la vagina hace 6 horas.","PA 112/70 · FC 90 · Temp 37.4",["Rotura prematura de membranas","Infección urinaria","Embarazo normal"],"Perder líquido antes del parto es rotura de membranas.",["Antibiótico y corticoide fetal","Baño de inmersión","Enviarla a casa"],"El antibiótico previene infección y el corticoide madura los pulmones del bebé.",["Previene infección y madura los pulmones del bebé.", "Con la bolsa rota, el agua puede facilitar infecciones.", "Con la bolsa rota necesita vigilancia hospitalaria."]),
+C(4,0,"Eclampsia","36 semanas, convulsiona en el consultorio, PA muy alta.","PA 180/115 · FC 110 · FCF 120 · Prot 3",["Eclampsia","Epilepsia simple","Desmayo"],"Convulsión con hipertensión en gestante es eclampsia.",["Magnesio, vía aérea y parto","Solo esperar","Darle agua"],"Sulfato de magnesio, vía aérea protegida y planificar el parto.",["Detiene las convulsiones y protege a la madre; luego se interrumpe el embarazo.", "Las convulsiones pueden repetirse.", "Convulsionando puede atragantarse."]),
+C(4,1,"Desprendimiento de placenta","35 semanas, dolor intenso, útero duro y sangrado oscuro.","PA 95/60 · FC 118 · FCF 100",["Desprendimiento de placenta","Parto normal","Gastritis"],"Dolor con útero duro y sangrado oscuro es desprendimiento.",["Estabilizar y cesárea urgente","Caminar y esperar","Solo analgésicos"],"Se estabiliza a la madre y se interrumpe el embarazo con urgencia.",["Repone la sangre y saca al bebé rápido.", "Caminar con la placenta desprendida es peligroso.", "Calman el dolor pero no frenan el sangrado."]),
+C(4,1,"Distocia de hombros","41 semanas, salió la cabeza pero los hombros no avanzan.","PA 125/80 · FC 105 · FCF 100",["Distocia de hombros","Parto normal","Fase latente"],"La cabeza sale y se retrae: hombros atascados.",["McRoberts y presión suprapúbica","Jalar la cabeza fuerte","No hacer nada"],"McRoberts y presión suprapúbica liberan el hombro sin jalar.",["Abre la pelvis y empuja el hombro para liberarlo.", "Puede lesionar los nervios del bebé.", "El bebé no respira mientras está atascado."]),
+C(5,1,"Prolapso de cordón","38 semanas, se rompe la bolsa y se ve el cordón.","PA 110/70 · FC 96 · FCF 70",["Prolapso de cordón","Pérdida de tapón","Parto normal"],"Cordón visible tras romper bolsa es prolapso.",["Elevar presentación y cesárea ya","Empujar el cordón y esperar","Parto en casa"],"Se evita la compresión del cordón con cesárea de urgencia.",["Evita comprimir el cordón y saca al bebé ya.", "Un cordón comprimido corta el oxígeno al bebé.", "Sin quirófano el bebé corre peligro."]),
+C(5,0,"Placenta previa","32 semanas, sangrado rojo vivo sin dolor.","PA 100/62 · FC 112 · FCF 140",["Placenta previa","Desprendimiento de placenta","Parto normal"],"Sangrado rojo indoloro sugiere placenta previa.",["Reposo, ecografía y sin tacto","Tacto vaginal ya","Inducir el parto"],"Nunca se hace tacto vaginal; se confirma con ecografía y se planifica cesárea.",["Confirma la placenta sin provocar más sangrado.", "Puede causar una hemorragia grave.", "La placenta tapa la salida: el parto vaginal es peligroso."]),
+C(5,1,"Sepsis puerperal","3 días posparto, fiebre alta y loquios con mal olor.","PA 85/50 · FC 130 · Temp 39.5",["Sepsis puerperal","Loquios normales","Mastitis simple"],"Fiebre, taquicardia y loquios fétidos: infección grave.",["Antibióticos IV y líquidos","Solo paracetamol","Esperar 2 días"],"Antibióticos intravenosos y reposición de líquidos de inmediato.",["Atacan la infección y sostienen la presión.", "Baja la fiebre pero la infección sigue.", "La sepsis avanza en horas."]),
+C(1,0,"Náuseas del embarazo","10 semanas, náuseas por la mañana, pero come y toma líquidos con normalidad.","PA 108/68 · FC 80 · Temp 36.8",["Náuseas normales del embarazo","Preeclampsia","Infección urinaria"],"Náuseas matutinas leves sin deshidratación son frecuentes al inicio del embarazo.",["Comidas pequeñas y frecuentes","Hospitalizarla de inmediato","Cesárea programada"],"Se aconsejan comidas pequeñas y frecuentes y se vigila que no se deshidrate.",["Alivian las náuseas sin medicamentos fuertes.","No hay deshidratación ni peligro que justifique internarla.","Una cirugía no tiene nada que ver con las náuseas."]),
+C(1,0,"Lactancia posparto","1 día posparto, el bebé no se prende bien y el pezón duele.","PA 112/70 · FC 82 · Temp 36.8",["Mal agarre del pecho","Mastitis","Sepsis puerperal"],"Dolor desde el primer día y el bebé mal prendido apuntan a un mal agarre, no a una infección.",["Corregir la posición y el agarre","Suspender la lactancia","Dar antibiótico"],"Se corrige la postura: barriga con barriga y boca bien abierta cubriendo la areola.",["Mejora la salida de leche y quita el dolor.","Un mal agarre se corrige; dejar el pecho no es necesario.","No hay fiebre ni infección que tratar."]),
+C(2,0,"Amenaza de aborto","8 semanas, sangrado leve y cólico suave, el cuello está cerrado.","PA 110/70 · FC 88 · Temp 36.9",["Amenaza de aborto","Placenta previa","Parto prematuro"],"Sangrado leve con cuello cerrado en las primeras semanas es una amenaza de aborto.",["Ecografía y vigilar el sangrado","Legrado inmediato","Darla de alta sin control"],"Se confirma con ecografía que el embarazo sigue y se vigila el sangrado.",["Confirma si el embrión sigue vivo y detecta señales de alarma.","El cuello está cerrado: no hace falta vaciar el útero.","Sin control no se detecta si el sangrado empeora."]),
+C(2,0,"Hipertensión gestacional","32 semanas, PA alta en dos controles, sin dolor de cabeza ni proteinuria.","PA 146/92 · FC 82 · FCF 142 · Prot 0",["Hipertensión gestacional","Preeclampsia severa","Embarazo normal"],"PA desde 140/90 sin proteinuria ni síntomas: hipertensión gestacional.",["Controles de PA y vigilancia","Sulfato de magnesio ya","No hacer nada"],"Se vigilan PA, síntomas y proteinuria porque puede evolucionar a preeclampsia.",["Detecta a tiempo si empeora hacia preeclampsia.","El magnesio es para la preeclampsia severa; aquí no hace falta.","Puede empeorar sin que nadie lo note."]),
+C(3,0,"Embarazo ectópico","7 semanas, dolor fuerte en un lado del abdomen, mareo y sangrado leve.","PA 88/54 · FC 122 · Temp 36.6",["Embarazo ectópico roto","Amenaza de aborto","Gastritis"],"Dolor lateral con shock en las primeras semanas: sospecha de ectópico roto.",["Vía venosa, líquidos y cirugía urgente","Reposo en casa","Analgésico y observar"],"Se canaliza, se repone volumen y se opera con urgencia.",["Repone la sangre perdida y detiene la hemorragia interna.","Se desangra por dentro: no puede esperar en casa.","Calma el dolor pero no frena la hemorragia."]),
+C(3,1,"Placenta retenida posparto","Posparto inmediato: a los 30 minutos la placenta no sale y sigue el sangrado.","PA 98/60 · FC 112",["Retención de placenta","Desgarro leve","Infección urinaria"],"Si la placenta no sale y hay sangrado tras el parto, hay retención.",["Extracción manual y oxitocina","Jalar fuerte del cordón","Esperar varias horas"],"Se extrae la placenta con técnica segura y se da oxitocina para contraer el útero.",["Saca la placenta y frena el sangrado.","Puede romper el cordón o invertir el útero.","Cada hora de espera aumenta la hemorragia."]),
+C(3,1,"Corioamnionitis","38 semanas, bolsa rota hace 20 horas, fiebre y flujo con mal olor.","PA 110/70 · FC 118 · FCF 175 · Temp 38.6",["Corioamnionitis","Infección urinaria","Parto normal"],"Fiebre, bolsa rota larga y taquicardia fetal: infección intraamniótica.",["Antibióticos y terminar el parto","Solo paracetamol","Esperar sin hacer nada"],"Se dan antibióticos y se termina el parto sin demora.",["Trata la infección y evita que llegue al bebé.","Baja la fiebre pero la infección sigue.","La infección puede pasar a la sangre de ambos."]),
+C(4,1,"Bebé sentado (podálico)","39 semanas, trabajo de parto, la ecografía muestra al bebé sentado.","PA 118/74 · FC 90 · FCF 138",["Presentación podálica","Fase latente","Parto normal con cabeza abajo"],"Bebé con la pelvis hacia abajo: presentación podálica.",["Preparar cesárea con equipo listo","Jalar al bebé por los pies","Pujar sin vigilancia"],"Lo más seguro es planificar una cesárea con equipo preparado.",["Reduce el riesgo de que la cabeza quede atrapada.","Jalar puede lesionar al bebé.","Sin vigilancia no se detecta si el cordón se comprime."]),
+C(5,1,"Embolia de líquido amniótico","En pleno parto, de pronto le falta el aire, se pone azul y pierde el conocimiento.","PA 70/40 · FC 140 · FCF 80",["Embolia de líquido amniótico","Ansiedad","Contracción fuerte"],"Colapso súbito con falta de aire en el parto: sospecha de embolia amniótica.",["Reanimar, oxígeno y parto urgente","Darle agua y calmarla","Observar una hora"],"Se reanima, se da oxígeno y se acelera el parto mientras se sostiene la circulación.",["Sostiene su respiración y circulación mientras nace el bebé.","Se está ahogando: el agua no ayuda.","Cada minuto sin oxígeno pone en riesgo a ambos."])
+];
+const AN=[["🤰🏻","Ana","👩🏻‍🍼"],["🤰🏽","Yesenia","👩🏽‍🍼"],["🤰🏾","Rosmery","👩🏾‍🍼"],["🤰🏼","Lucía","👩🏼‍🍼"],["🤰🏿","Milagros","👩🏿‍🍼"],["🤰🏽","Nelly","👩🏽‍🍼"],["🤰🏻","Marleny","👩🏻‍🍼"],["🤰🏼","Fiorella","👩🏼‍🍼"],["🤰🏾","Yaneth","👩🏾‍🍼"],["🤰🏽","Luz","👩🏽‍🍼"]];
+const IT=[
+{k:"hint",e:"💡",n:"Pista",c:40,d:"Quita una respuesta incorrecta"},
+{k:"skip",e:"⏭️",n:"Pase de minijuego",c:60,d:"Salta un minijuego"},
+{k:"time",e:"⏳",n:"Reloj de arena",c:70,d:"Congela la paciencia 12 s"},
+{k:"heart",e:"💖",n:"Corazón de reserva",c:110,d:"Evita perder un corazón"},
+{k:"shoes",e:"👟",n:"Zapatillas veloces",c:90,d:"Caminas más rápido",p:1},
+{k:"calm",e:"🍵",n:"Té calmante",c:150,d:"Las pacientes esperan más",p:1}];
+const $=id=>document.getElementById(id),cv=$("cv"),g=cv.getContext("2d"),W=800,H=460;
+const SP=[{x:80,y:150},{x:80,y:250},{x:80,y:350}],BED=[{x:400,y:300},{x:670,y:300}],ROOM=["Consultorio","Sala de partos"];
+const EM='"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif',MAXM=4;
+let P,pats=[],Q=[],AS=[],keys={},coins=0,hearts=3,done=0,cured=0,nxt=0,spT=1,over=true,modal=true,bed=[null,null],tm=0,tt,lvl=1,freeze=0,parts=[],TM=[],lb=0;
+let inv={hint:1,skip:0,time:0,heart:0},perm={shoes:0,calm:0};
+let T=0,T0=1,panic=0,inShop=false,lmsg="",LRN=[];
+let cur=null,sayT,sayO,SC=1,TR=null;
+
+/* ---------- Puntaje, racha, logros y récord ---------- */
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
+let ST=0;
+const STEPS=["Examen","Diagnóstico","Práctica","Tratamiento"],ECG='<svg class="ecgl" viewBox="0 0 200 30" preserveAspectRatio="none"><polyline points="0,15 40,15 50,15 55,3 60,27 65,15 100,15 140,15 150,15 155,3 160,27 165,15 200,15"/></svg>';
+const DN=["🌱 Estudiante (más tiempo)","🩺 Obstetra","🔥 Experta (menos tiempo, más puntos)"],DT=[1.4,1,.75],DP=[.7,1,1.3],DS=[.8,1,1.3];
+let dif=LS.get("me_df",1);
+let deaths=0,hush=0,score=0,sL=0,combo=0,bestCombo=0,errs=0,shake=0,lStars=1,lSum={tb:0,pb:0,hb:0},MISS=[],recNew=false;
+let pname=LS.get("me_name",""),best=LS.get("me_best",0),bestName=LS.get("me_bestn",""),ach=LS.get("me_ach",{});
+const ACH={first:["🩺","Primera paciente recuperada"],c3:["🔥","Racha de 3"],c5:["⚡","Racha de 5"],perfect:["💎","Nivel perfecto"],quick:["⏱️","Rápida como el rayo"],l3:["🚨","Llegaste a Emergencias"],rich:["💰","500 monedas"],l5:["🏆","Código rojo superado"]};
+const RK=[[0,"Practicante 🌱"],[2500,"Obstetra interna 🩺"],[6000,"Obstetra 👩‍⚕️"],[10000,"Obstetra especialista 🌟"],[14000,"Jefa del servicio de Obstetricia 👑"]];
+function rank(s){let i=0;RK.forEach((r,j)=>{if(s>=r[0])i=j});return{n:RK[i][1],next:RK[i+1]?RK[i+1][0]:0,nn:RK[i+1]?RK[i+1][1]:""}}
+function award(k){if(!ACH[k]||ach[k])return;ach[k]=1;LS.set("me_ach",ach);coins+=20;toast("🏅 Logro: "+ACH[k][0]+" "+ACH[k][1]+" (+20 🪙)");snd(784,.12,"square",.05);snd(1047,.2,"square",.05,.12);hud()}
+function grief(p,why){
+  modal=true;deaths++;hush=7;shake=.5;cv.style.filter="grayscale(1) brightness(.6)";
+  snd(196,1.4,"sine",.12);snd(147,1.8,"sine",.12,.4);
+  showBox('<h3>🕯️ '+esc(p.n)+' falleció</h3><p>Murió por '+why+'.</p><div class="info">🌷 Su familia esperaba afuera y nadie pudo darles buenas noticias.'+(p.c.l>=4?'<br>👶 Su bebé también quedó en grave riesgo.':'')+'</div><div class="info">📚 <b>Qué podía salvarla:</b><br>'+p.c.d[0]+' → '+p.c.t[0]+'.<br><small>'+p.c.tf+'</small></div><p><small>En la vida real cada decisión cuenta. Por eso se practica aquí: para que no vuelva a pasar.</small></p><button class="go" id="nx">Aprender y continuar</button>');
+  const bx=$("m").firstChild;bx.classList.add("dk");
+  $("nx").onclick=()=>{hideBox();cv.style.filter="";modal=false;check()};
+}
+function brk(){combo=0;errs++;shake=.35}
+function addMiss(p){const t="<b>"+p.c.n+":</b> "+p.c.tf;if(!MISS.includes(t))MISS.push(t)}
+function saveBest(){if(score>best){best=score;bestName=pname||"Obstetra";LS.set("me_best",best);LS.set("me_bestn",bestName);recNew=true}}
+function endInfo(){
+  saveBest();const r=rank(score),ks=Object.keys(ACH),n=ks.filter(k=>ach[k]).length;
+  return '<div class="info">👩‍⚕️ <b>'+esc(pname||"Obstetra")+'</b> · '+r.n+'<br>'+DN[dif].split(" (")[0]+'<br>⭐ Puntaje: <b>'+score+'</b> · 🏆 Récord: <b>'+best+'</b>'+(recNew?' 🎉 ¡Nuevo récord!':'')+(r.next?'<br><small>Te faltan '+(r.next-score)+' pts para '+r.nn+'</small>':'<br><small>¡Rango máximo! 👑</small>')+(deaths?'<br>🕯️ Pacientes perdidas: <b>'+deaths+'</b>':'')+'<br><small>🔥 Mejor racha: '+bestCombo+' · 🏅 Logros '+n+'/'+ks.length+': '+ks.map(k=>ach[k]?ACH[k][0]:"🔒").join(" ")+'</small></div>'+(MISS.length?'<div class="info">📚 <b>Para repasar</b><br>'+MISS.join("<br>")+'</div>':'')+'<p><small>📸 Toma captura y compártela con tu clase</small></p>';
+}
+
+/* ---------- Audio ---------- */
+let ac,mute=false,mi;
+function snd(f,d=.15,ty="sine",v=.1,w=0){if(!ac||mute)return;const o=ac.createOscillator(),gn=ac.createGain(),t=ac.currentTime+w;o.type=ty;o.frequency.value=f;gn.gain.setValueAtTime(v,t);gn.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(gn);gn.connect(ac.destination);o.start(t);o.stop(t+d)}
+function music(){
+  if(!ac){const A=window.AudioContext||window.webkitAudioContext;if(!A)return;ac=new A()}
+  ac.resume();if(mi)return;
+  const mel=[523,659,784,659,587,698,880,698,523,659,784,1047,988,784,659,587],bass=[131,175,196,131];let i=0;
+  const step=()=>{
+    if(!mute&&!hush){const k=1+.2*panic;snd(mel[i%16]*k,.55-.3*panic,"triangle",.045+.03*panic);if(i%4==0)snd(bass[(i/4)%4]*k,1.6-.9*panic,"sine",.07);if(panic>.5&&i%2==0)snd(80,.12,"sine",.12)}
+    i++;mi=setTimeout(step,450-280*panic);
+  };
+  step();
+}
+const ok=()=>{snd(660,.12,"square",.04);snd(880,.18,"square",.04,.1)},no=()=>snd(150,.3,"sawtooth",.06);
+
+/* ---------- UI ---------- */
+const SAY=["¡Ay, me duele!","¿Mi bebé está bien?","Tengo miedo...","Por favor, ayúdeme","Obstetra, me siento mal","¿Va a estar todo bien?","Estoy muy nerviosa...","¿Mi bebé se va a salvar?","Por favor, no me deje sola","¿Qué me está pasando?"],SAYH=["¡Mi bebé! ¡Haga algo!","No puedo más...","Se me nubla la vista...","¡Rápido, por favor!","Siento que me desmayo...","¡Tengo mucho miedo!","¡No dejen que le pase algo a mi bebé!","¡Ayúdeme, se lo suplico!","Me falta el aire..."];
+function mood(p){const v=p.c.l+p.m+(panic>.5?1:0);return v<3?["😟","Preocupada"]:v<5?["😰","Muy asustada"]:["😱","Angustiada"]}
+function face(){if(!cur||!$("mf"))return;const m=mood(cur);$("mf").textContent=m[0];$("mst").innerHTML="<b>"+cur.n+"</b><br>Estado: "+m[1]}
+function say(t){const e=$("mbb");if(!e||!cur)return;const L=cur.c.l>=4?SAYH:SAY;e.textContent=t||L[Math.floor(Math.random()*L.length)];e.className="mbb on";clearTimeout(sayO);sayO=setTimeout(()=>{const x=$("mbb");if(x)x.className="mbb"},4500)}
+function showBox(h){
+  clr();clearInterval(sayT);const m=$("m");
+  const sev=cur&&cur.c.l>=3,band=cur&&ST?'<div class="band '+(sev?'sr':'sg')+'"><div>'+cur.e+' <b>'+esc(cur.n)+'</b>'+(sev?' <span class="tag">🚨 CÓDIGO</span>':'')+'</div><div class="stp">'+STEPS.map((t,i)=>'<span class="'+(i+1<ST?'dn':i+1==ST?'on':'')+'">'+(i+1<ST?'✓':i+1)+'<em>'+t+'</em></span>').join('')+'</div></div>':'';
+  m.innerHTML='<div class="box">'+band+'<div class="bd">'+(cur?'<div class="row"><div class="mom"><div class="mst" id="mst"></div><div class="mf" id="mf"></div><div class="mbb" id="mbb"></div></div><div class="main">'+h+'</div></div>':h)+'</div></div>';
+  m.classList.remove("hide");
+  if(cur){face();if(Math.random()<.7)say();sayT=setInterval(()=>{face();if(Math.random()<.7)say()},7000)}
+}
+function hideBox(){clearInterval(sayT);$("m").classList.add("hide")}
+function chip(h,c){return '<span class="chip '+(c||"")+'">'+h+'</span>'}
+function hud(){$("sc").innerHTML=chip("⭐ "+score)+(combo>1?chip("🔥 x"+combo,"hot"):"");$("lv").textContent=lvl;$("h").innerHTML=chip("❤️".repeat(hearts)+"🖤".repeat(Math.max(0,3-hearts)))+chip("🪙 "+coins)+chip("💡"+inv.hint+" ⏭️"+inv.skip+" ⏳"+inv.time+" 💖"+inv.heart)+chip("👥 "+done+"/"+Q.length)}
+function toast(s){const t=$("t");t.textContent=s;t.classList.remove("hide");clearTimeout(tt);tt=setTimeout(()=>t.classList.add("hide"),2300)}
+function shuffle(a){return a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1])}
+function clr(){TM.forEach(clearInterval);TM=[]}
+function info(p){return '<div class="fic"><span class="av">'+p.e+'</span><div><b>'+esc(p.n)+'</b> · '+p.c.n+(p.c.l>=3?' 🚨':'')+'<small>'+p.c.cond+'</small><small class="vs">'+p.c.v+'</small></div></div>'}
+function loseHeart(){brk();if(inv.heart>0){inv.heart--;toast("💖 ¡Corazón de reserva usado!")}else hearts--;hud()}
+
+function intro(){
+  over=true;modal=true;
+  showBox('<div class="hero"><div class="logo">🏥🤰👶</div><h1>Maternidad Esperanza</h1><p class="sub">Simulador de Obstetricia · 5 niveles</p></div><div class="flow"><div><b>1</b>🚪<span>Admite</span></div><div><b>2</b>🩺<span>Examina</span></div><div><b>3</b>🧠<span>Diagnostica</span></div><div><b>4</b>🎮<span>Practica</span></div><div><b>5</b>💊<span>Trata</span></div></div><p class="rules">❤️ 3 corazones · ⏱️ cronómetro por nivel · 🔥 rachas y ⭐ puntos · 🏅 8 logros · 🛒 tienda<br>Meta: llegar a <b>Jefa del servicio de Obstetricia</b> 👑</p><p><input id="nm" class="nm" maxlength="14" placeholder="✍️ Tu nombre" value="'+esc(pname)+'"></p><p><select id="df" class="nm">'+DN.map((t,i)=>'<option value="'+i+'"'+(i==dif?' selected':'')+'>'+t+'</option>').join("")+'</select></p>'+(best?'<p class="rec">🏆 Récord: <b>'+best+'</b> · '+esc(bestName)+'</p>':'')+'<button class="go" id="st">▶ Empezar el turno</button><p class="note">⚠️ El juego simula desenlaces graves, incluso la muerte de pacientes, para enseñar el peso de cada decisión. Es educativo y no sustituye la formación profesional.</p>');
+  $("st").onclick=()=>{pname=($("nm").value.trim()||"Obstetra").slice(0,14);dif=+$("df").value;LS.set("me_df",dif);LS.set("me_name",pname);music();newGame()};
+}
+function newGame(){lvl=1;coins=0;deaths=0;score=sL=0;combo=bestCombo=0;MISS=[];recNew=false;inv={hint:1,skip:0,time:0,heart:0};perm={shoes:0,calm:0};startLevel()}
+function startLevel(){
+  clr();TR=null;score=sL;combo=0;errs=0;shake=0;P={x:230,y:250,tg:null};pats=[];AS=shuffle(AN);
+  const now=shuffle(CASES.filter(c=>c.l==lvl)),old=shuffle(CASES.filter(c=>c.l<lvl));
+  Q=shuffle(now.concat(old).slice(0,[3,4,4,5,5][lvl-1]));
+  done=cured=nxt=0;hearts=3;spT=1;freeze=0;T=T0=Math.round((Q.length*75+30)*DT[dif]);lmsg="";LRN=[];cur=null;inShop=false;panic=0;over=false;modal=false;bed=[null,null];hud();hideBox();toast("Nivel "+lvl+": "+LV[lvl-1]);if(lvl>=3)setTimeout(()=>award("l3"),2500);
+}
+function check(){if(hearts<=0)lose();else if(done>=Q.length)levelEnd()}
+function lose(){
+  cur=null;over=true;modal=true;
+  showBox('<h3>🌙 Fin del turno</h3><p>'+(lmsg||'Se acabaron los corazones en el nivel '+lvl+'.')+' Puedes comprar ayudas y reintentar.</p><div class="info">Recuperadas: <b>'+cured+'/'+Q.length+'</b> · 🪙 '+coins+'</div>'+endInfo()+'<button class="go" id="sh">🛒 Tienda</button><button class="go" id="ag">Reintentar nivel</button>');
+  $("sh").onclick=()=>shop(lose);$("ag").onclick=startLevel;
+}
+function levelEnd(){
+  over=true;modal=true;
+  const perf=errs==0&&cured==Q.length,tb=Math.round(T)*3,pb=perf?300*lvl:0,hb=hearts*100;
+  lStars=perf?3:cured==Q.length?2:1;lSum={tb,pb,hb};score+=tb+pb+hb;
+  lb=50*lvl+10*cured+(perf?50:0);coins+=lb;
+  if(perf)award("perfect");if(T>T0/2)award("quick");
+  for(let i=0;i<40;i++)parts.push({e:["🎉","⭐","💖","🎊"][i%4],x:Math.random()*W,y:200+Math.random()*250,l:1.5+Math.random()*1.5});
+  hud();ok();lvlBox();
+}
+function lvlBox(){
+  if(lvl>=5){award("l5");showBox('<h3>🏆 ¡Felicidades, obstetra!</h3><p>Completaste los 5 niveles, incluso el Código rojo.</p><div class="info">Monedas: <b>'+coins+'</b> 🪙</div>'+endInfo()+'<button class="go" id="ag">Jugar de nuevo</button>');$("ag").onclick=newGame;return}
+  showBox('<h3>🎊 Nivel '+lvl+' completado</h3><p>'+"⭐".repeat(lStars)+"☆".repeat(3-lStars)+'<br>Recuperadas: '+cured+'/'+Q.length+' · Bono +'+lb+' 🪙<br>⏱️ Tiempo +'+lSum.tb+' pts · ❤️ Corazones +'+lSum.hb+' pts'+(lSum.pb?'<br>💎 Nivel perfecto +'+lSum.pb+' pts':'')+'<br>🏆 Puntaje: <b>'+score+'</b></p><div class="info">Siguiente: <b>Nivel '+(lvl+1)+' · '+LV[lvl]+'</b><br><small>Más pacientes, menos paciencia y complicaciones graves.</small></div><div class="info">📚 <b>Repaso del nivel</b><br>'+LRN.join("<br>")+'</div><button class="go" id="sh">🛒 Ir a la tienda</button><button class="go" id="nl">Siguiente nivel ▶</button>');
+  $("sh").onclick=()=>shop(lvlBox);$("nl").onclick=()=>{lvl++;sL=score;startLevel()};
+}
+function shop(back){
+  modal=true;inShop=true;
+  showBox('<h3>🛒 Tiendita · 🪙 '+coins+'</h3><div id="il"></div><button class="go" id="cl">Cerrar</button>');
+  IT.forEach(it=>{
+    const own=it.p&&perm[it.k],b=document.createElement("button");b.className="o";b.disabled=!!own||coins<it.c;
+    b.innerHTML=it.e+' <b>'+it.n+'</b> — '+it.c+' 🪙'+(own?' ✔':'')+'<br><small>'+it.d+(it.p?'':' (tienes '+inv[it.k]+')')+'</small>';
+    b.onclick=()=>{coins-=it.c;if(it.p)perm[it.k]=1;else inv[it.k]++;ok();hud();shop(back)};
+    $("il").appendChild(b);
+  });
+  $("cl").onclick=()=>{inShop=false;back()};
+}
+function guide(){
+  const pv=inShop,d=$("gd");inShop=true;
+  d.innerHTML='<div class="box"><h3>📖 Guía rápida</h3><div class="info"><b>Valores normales en la gestante</b><br>🩸 PA: menos de 140/90 mmHg<br>💓 Pulso: 60-100 lpm<br>🌡️ Temperatura: 36-37.5 °C<br>📡 FC fetal: 110-160 lpm<br>🧪 Glucosa en ayunas: menos de 95 mg/dl<br>🩸 Hemoglobina: 11 g/dl o más</div><div class="info"><b>Trabajo de parto</b><br>Latente: hasta 5-6 cm. Activa: desde 6 cm con contracciones regulares. Expulsivo: dilatación completa, ahí se puja.</div><div class="info"><b>Señales de alarma</b><br>🚨 Dolor de cabeza fuerte, luces y PA alta: preeclampsia<br>🚨 Convulsiones: eclampsia<br>🚨 Sangrado rojo sin dolor: placenta previa<br>🚨 Sangrado oscuro, dolor y útero duro: desprendimiento<br>🚨 Útero blando tras el parto: atonía<br>🚨 Fiebre y loquios con mal olor: sepsis</div><p><small>Tip: usa los instrumentos para reunir pistas y compáralas con estos valores.</small></p><button class="go" id="gx">Cerrar</button></div>';
+  d.classList.remove("hide");$("gx").onclick=()=>{inShop=pv;d.classList.add("hide")};
+}
+function useTime(){
+  if(modal||over)return;
+  if(inv.time<1){toast("No tienes ⏳. Compra uno en la tienda");return}
+  inv.time--;freeze=12;hud();toast("⏳ Pacientes en pausa 12 s");
+}
+
+/* ---------- Atención ---------- */
+function act(p){
+  if(modal||over)return;
+  if(p.st=="wait"){const r=p.c.room;
+    if(bed[r]){toast("La "+ROOM[r]+" está ocupada");return}
+    bed[r]=p;p.st="bed";LS.set("me_tut",1);p.x=BED[r].x;p.y=BED[r].y-5;ok();toast(p.n+" admitida en "+ROOM[r]+" ✔");
+  }else if(p.st=="bed")open(p);
+}
+function ask(p,title,list,fbt,next,ex,why){
+  modal=true;
+  showBox('<h3>'+title+'</h3>'+(ex||info(p))+'<div id="ol"></div><p id="fb"></p><div id="hb"></div>');
+  const bs=shuffle(list.map((t,i)=>({t,ok:i==0}))).map((it,ix)=>{
+    const b=document.createElement("button");b.className="o ch";b.innerHTML='<span class="lt">'+(ix+1)+'</span><span>'+esc(it.t)+'</span>';b.ok=it.ok;
+    b.onclick=()=>{
+      if(it.ok){ok();if($("mf")){$("mf").textContent="🙂";say("Gracias, ya me siento mejor")}[...$("ol").children].forEach(x=>x.disabled=true);$("hb").innerHTML="";b.classList.add("ok");$("fb").className="fb fok";$("fb").innerHTML='✅ '+fbt+'<button class="go" id="nx">Continuar</button>';$("nx").onclick=next}
+      else{no();b.disabled=true;b.classList.add("bad");brk();p.m++;if(p.m>=MAXM)fail(p);else{face();say("¿Está segura, obstetra?");$("fb").className="fb fno";$("fb").textContent="❌ "+((why&&why[it.t])||(ex?"No encaja con tus hallazgos ⚠️.":"Esa no es."))+" Te quedan "+(MAXM-p.m)+" intentos."}}
+    };
+    $("ol").appendChild(b);return b;
+  });
+  if(inv.hint>0){
+    const h=document.createElement("button");h.className="o";h.textContent="💡 Usar pista ("+inv.hint+")";
+    h.onclick=()=>{const w=bs.find(x=>!x.ok&&!x.disabled);if(w){inv.hint--;w.disabled=true;w.classList.add("bad");hud();h.remove()}};
+    $("hb").appendChild(h);
+  }
+}
+const TL=[
+{e:"🗣️",n:"Preguntar"},
+{e:"🩸",n:"Tensiómetro",k:"PA ",d:"PA 110/70",u:"mmHg",r:"normal: menos de 140/90",b:n=>n[0]>=140||n[1]>=90?"presión alta":n[0]<100?"presión baja: posible shock":""},
+{e:"💓",n:"Pulso",k:"FC ",d:"FC 80",u:"lpm",r:"normal: 60-100",b:n=>n[0]>100?"pulso rápido (taquicardia)":n[0]<60?"pulso lento":""},
+{e:"🌡️",n:"Termómetro",k:"Temp ",d:"Temp 36.7",u:"°C",r:"normal: 36-37.5",b:n=>n[0]>37.5?"fiebre: posible infección":""},
+{e:"📡",n:"Doppler fetal",k:"FCF ",d:"FCF 140",u:"lpm",r:"normal: 110-160",b:n=>n[0]<110?"FC fetal baja: el bebé sufre":n[0]>160?"FC fetal alta":""},
+{e:"🧪",n:"Glucómetro",k:"Glucosa ",d:"Glucosa 85",u:"mg/dl",r:"normal: menos de 95",b:n=>n[0]>=95?"glucosa alta: posible diabetes":""},
+{e:"🔬",n:"Hemoglobina",k:"Hb ",d:"Hb 12.5",u:"g/dl",r:"normal: 11 o más",b:n=>n[0]<11?"anemia":""},
+{e:"🧫",n:"Tira de orina",k:"Prot ",d:"Prot 0",u:"cruces de proteína",r:"normal: 0",b:n=>n[0]>=2?"proteinuria: sospecha de preeclampsia":n[0]==1?"trazas de proteína":""}];
+function open(p){
+  cur=p;ST=1;modal=true;const L=[],its=p.c.v.split(" · "),pp=/posparto/i.test(p.c.n+p.c.cond);
+  showBox('<h3>🩺 Examina a '+esc(p.n)+'</h3><p class="sub">Usa los instrumentos de la bandeja. Reúne al menos 2 datos y luego diagnostica.</p><div class="arena"><span id="pt">'+p.e+'</span><span id="ut"></span></div><div class="tray" id="ty"></div><div class="mon" id="cl">'+ECG+'<div class="ph">📟 Monitor en espera… toca un instrumento</div></div><button class="go" id="dg" disabled>🧠 Hacer diagnóstico</button>');
+  TL.forEach(t=>{
+    const b=document.createElement("button");b.className="tl lab";b.innerHTML=t.e+'<small>'+t.n+'</small>';b.setAttribute("aria-label",t.n);
+    b.onclick=()=>{
+      if(b.classList.contains("used"))return;b.classList.add("used");let s;
+      if(!t.k)s='<div class="vt note"><span class="vi">'+t.e+'</span><div><b>Historia clínica</b><span class="vq">'+p.c.cond+'</span></div></div>';
+      else if(pp&&t.k=="FCF ")s='<div class="vt ok"><span class="vi">'+t.e+'</span><div><b>'+t.n+'</b><span class="vq">No aplica: el bebé ya nació ✅</span></div></div>';
+      else{const x=its.find(y=>y.startsWith(t.k))||t.d,m=t.b(x.match(/[\d.]+/g).map(Number));
+        s='<div class="vt '+(m?'bad':'ok')+'"><span class="vi">'+t.e+'</span><div><b>'+t.n+'</b><span class="vv">'+x.slice(t.k.length)+' <small>'+t.u+'</small></span><small>'+t.r+'</small>'+(m?'<span class="vw">⚠️ '+m+'</span>':'<span class="vw ok">✅ normal</span>')+'</div></div>'}
+      L.push(s);$("cl").innerHTML=ECG+L.join("");$("dg").disabled=L.length<2;
+      const u=$("ut");u.textContent=t.e;u.className="";void u.offsetWidth;u.className="uz";snd(520,.1,"triangle",.06);
+    };
+    $("ty").appendChild(b);
+  });
+  $("dg").onclick=()=>{ST=2;ask(p,"🧠 ¿Cuál es tu diagnóstico?",p.c.d,"Es <b>"+p.c.d[0]+"</b>. "+p.c.df,()=>mini(p),'<div class="mon sm">'+L.join("")+'</div>')};
+}
+
+function trat(p){ST=4;
+  modal=true;const L=[],IC=shuffle(["💊","💉","🌿"]),O=p.c.t.map((t,i)=>({t,w:p.c.w[i],e:IC[i]})),res='<div class="info">'+p.e+' <b>'+p.n+'</b> · '+p.c.n+'<br><small>'+p.c.cond+'</small></div>';
+  showBox('<h3>💊 Elige el tratamiento</h3>'+res+'<p>🧪 <b>Simulador:</b> arrastra (o toca) cada tratamiento del botiquín hasta la paciente y observa cómo reacciona. Prueba al menos 2.</p><div class="arena"><span id="pt">'+p.e+'</span><span id="ut"></span></div><div class="tray" id="ty"></div><div class="info" id="cl">Aún no revisaste ningún tratamiento.</div><button class="go" id="dg" disabled>💊 Aplicar tratamiento</button>');
+  const test=o=>{
+    const good=o.t===p.c.t[0],pt=$("pt"),u=$("ut");
+    L.push((good?"✅ ":"⚠️ ")+o.e+" <b>"+o.t+":</b> "+o.w);$("cl").innerHTML=L.join("<br>");$("dg").disabled=L.length<2;
+    pt.className="";void pt.offsetWidth;pt.className=good?"hp":"sh";
+    u.textContent=good?"😌✨":"😖";u.className="";void u.offsetWidth;u.className="uz";
+    if(good){snd(660,.12,"square",.04);snd(880,.18,"square",.04,.1)}else snd(180,.25,"sawtooth",.05);
+  };
+  shuffle(O).forEach(o=>{
+    const b=document.createElement("button");b.className="tl";b.textContent=o.e;b.setAttribute("aria-label","Tratamiento");
+    b.onpointerdown=ev=>{
+      if(b.classList.contains("used"))return;
+      ev.preventDefault();const f=document.createElement("div");f.className="fl";f.textContent=o.e;document.body.appendChild(f);
+      const mv=x=>{f.style.left=x.clientX+"px";f.style.top=x.clientY+"px"};mv(ev);
+      const up=x=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);f.remove();
+        const el=$("pt");if(!el)return;const r=el.getBoundingClientRect();
+        if((x.clientX>r.left-25&&x.clientX<r.right+25&&x.clientY>r.top-25&&x.clientY<r.bottom+25)||Math.hypot(x.clientX-ev.clientX,x.clientY-ev.clientY)<8){b.classList.add("used");test(o)}};
+      addEventListener("pointermove",mv);addEventListener("pointerup",up);
+    };
+    $("ty").appendChild(b);
+  });
+  $("dg").onclick=()=>ask(p,"💊 ¿Qué tratamiento aplicas?",p.c.t,p.c.tf,()=>startTreat(p),res+'<div class="info"><b>Lo que revisaste</b><br>'+L.join("<br>")+'</div>',Object.fromEntries(p.c.t.map((t,i)=>[t,p.c.w[i]])));
+}
+
+/* ---------- Minijuegos ---------- */
+function mini(p){ST=3;
+  clr();const k=Math.floor(Math.random()*4);
+  showBox('<h3>🎮 '+["Calibrar el equipo","Tomar el pulso","Memoria médica","Curar a la paciente"][k]+'</h3>'+info(p)+'<div id="mg"></div><div id="mb"></div><div id="sk"></div>');
+  const good=()=>{clr();ok();$("sk").innerHTML="";$("mg").innerHTML='<p>✅ ¡Muy bien!</p>';$("mb").innerHTML='<button class="go" id="nx">Continuar</button>';$("nx").onclick=()=>trat(p)};
+  const bad=()=>{clr();no();$("sk").innerHTML="";brk();p.m++;if(p.m>=MAXM){fail(p);return}$("mg").innerHTML='<p>❌ Casi. Te quedan '+(MAXM-p.m)+' intentos.</p>';$("mb").innerHTML='<button class="go" id="nx">Reintentar</button>';$("nx").onclick=()=>mini(p)};
+  [g0,g1,g2,g3][k](good,bad,p);
+  if(inv.skip>0){const s=document.createElement("button");s.className="o";s.textContent="⏭️ Saltar minijuego ("+inv.skip+")";s.onclick=()=>{inv.skip--;hud();good()};$("sk").appendChild(s)}
+}
+function g0(good,bad){
+  const n=2+Math.ceil(lvl/2),S=Array.from({length:n},()=>Math.floor(Math.random()*4)),col=["#FF6B6B","#6BCB77","#4D96FF","#FFD93D"];let k=0;
+  $("mg").innerHTML='<p id="sm">Mira la secuencia de luces…</p><div class="pads" id="pd"></div>';
+  const pads=col.map((c,i)=>{const d=document.createElement("button");d.className="pad";d.style.background=c;d.disabled=true;d.setAttribute("aria-label","Luz "+(i+1));d.onclick=()=>press(i);$("pd").appendChild(d);return d});
+  const flash=i=>{pads[i].classList.add("on");snd(262*[1,1.25,1.5,2][i],.25,"triangle",.1);TM.push(setTimeout(()=>pads[i].classList.remove("on"),350))};
+  S.forEach((s,i)=>TM.push(setTimeout(()=>flash(s),700+i*650)));
+  TM.push(setTimeout(()=>{pads.forEach(d=>d.disabled=false);$("sm").textContent="¡Tu turno! Repite la secuencia."},700+n*650));
+  function press(i){flash(i);if(i==S[k]){if(++k==n)good()}else bad()}
+}
+function g1(good,bad){
+  let h=0,c,t0=performance.now(),pos=0;const z=42-5*lvl;
+  $("mg").innerHTML='<p>Toca ¡Ahora! cuando la barra esté en la zona verde. Aciertos: <b id="hp">0</b>/3</p><div id="bar"><div id="zn"></div><div id="mk"></div></div><button class="go" id="hit">💓 ¡Ahora!</button>';
+  const setZ=()=>{c=15+Math.random()*70;$("zn").style.left=(c-z/2)+"%";$("zn").style.width=z+"%"};setZ();
+  TM.push(setInterval(()=>{pos=50+46*Math.sin((performance.now()-t0)/1000*(2+lvl*.4));$("mk").style.left=pos+"%"},16));
+  $("hit").onclick=()=>{if(Math.abs(pos-c)<z/2){h++;$("hp").textContent=h;snd(700+h*100,.1,"square",.05);if(h>=3)good();else setZ()}else bad()};
+}
+function g2(good,bad){
+  const E=["💉","🩺","🍼","🧪"].slice(0,lvl>2?4:3),d=shuffle(E.concat(E)),mx=7-lvl;let fl=[],lock=0,pr=0,ms=0;
+  $("mg").innerHTML='<p>Encuentra las parejas. Fallos permitidos: '+mx+'</p><div class="cards" id="cs"></div>';
+  d.forEach(e=>{
+    const b=document.createElement("button");b.className="cd";b.setAttribute("aria-label","Carta");
+    b.onclick=()=>{
+      if(lock||b.textContent)return;b.textContent=e;b.e=e;fl.push(b);snd(500,.08,"triangle",.06);
+      if(fl.length==2){lock=1;const[a,c]=fl;fl=[];
+        if(a.e==c.e){a.classList.add("ok");c.classList.add("ok");lock=0;if(++pr==E.length)good()}
+        else{ms++;TM.push(setTimeout(()=>{a.textContent=c.textContent="";lock=0;if(ms>=mx)bad()},700))}}
+    };
+    $("cs").appendChild(b);
+  });
+}
+function g3(good,bad,p){
+  const S=(lvl>2?["🧤"]:[]).concat(["🧴","💉","🩹"]),X=shuffle(S.concat(lvl>1?["🌡️","🍬"]:[]));let k=0,ms=0;
+  $("mg").innerHTML='<p>Atiende a '+p.n+' en orden. Arrastra cada objeto hasta ella.</p><div class="info" id="ord">Orden: '+S.join(" → ")+'</div><div class="arena"><span id="pt">'+p.e+'</span></div><div class="tray" id="ty"></div>';
+  TM.push(setTimeout(()=>{if(lvl>=4&&k==0)$("ord").textContent="¿Recuerdas el orden? 🤔"},3500));
+  function use(e){
+    if(e==S[k]){k++;snd(600+k*120,.15,"triangle",.08);const t=$("pt");t.classList.remove("hp");void t.offsetWidth;t.classList.add("hp");$("ord").innerHTML="✅ "+S.slice(0,k).join(" ")+(k<S.length?" · siguiente…":"");if(k>=S.length)good()}
+    else{ms++;no();if(ms>=2)bad();else $("ord").textContent="❌ Ese no va ahora. Te queda 1 error."}
+  }
+  X.forEach(e=>{
+    const b=document.createElement("button");b.className="tl";b.textContent=e;b.setAttribute("aria-label","Objeto "+e);
+    b.onpointerdown=ev=>{
+      ev.preventDefault();const f=document.createElement("div");f.className="fl";f.textContent=e;document.body.appendChild(f);
+      const mv=x=>{f.style.left=x.clientX+"px";f.style.top=x.clientY+"px"};mv(ev);
+      const up=x=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);f.remove();
+        const el=$("pt");if(!el)return;const r=el.getBoundingClientRect();
+        if((x.clientX>r.left-25&&x.clientX<r.right+25&&x.clientY>r.top-25&&x.clientY<r.bottom+25)||Math.hypot(x.clientX-ev.clientX,x.clientY-ev.clientY)<8)use(e)};
+      addEventListener("pointermove",mv);addEventListener("pointerup",up);
+    };
+    $("ty").appendChild(b);
+  });
+}
+
+/* ---------- Resultados ---------- */
+function startTreat(p){
+  hideBox();modal=true;p.st="treat";p.tp=0;TR={p,t:0,d:2.5};toast("💊 Aplicando tratamiento a "+p.n+"…");snd(440,.15,"triangle",.07);
+}
+function leave(p){cur=null;ST=0;if(bed[p.c.room]===p)bed[p.c.room]=null;pats=pats.filter(x=>x!==p);done++;hud()}
+function win(p){
+  combo++;bestCombo=Math.max(bestCombo,combo);
+  const s=Math.max(1,3-p.m),mult=1+Math.min(combo-1,5)*.25,gain=Math.round((25*s+10*lvl)*mult),pts=Math.round((100*s+50*lvl)*mult*DS[dif]);coins+=gain;score+=pts;cured++;
+  parts.push({s:"+"+pts+" pts",x:p.x,y:p.y-60,l:1.8,c:"#2E8B57",z:22});if(combo>1)parts.push({s:"🔥 x"+combo,x:p.x,y:p.y-85,l:1.8,c:"#E8590C",z:20});
+  award("first");if(combo>=3)award("c3");if(combo>=5)award("c5");if(coins>=500)award("rich");T=Math.min(T0,T+5*s);LRN.push("<b>"+p.c.n+":</b> "+p.c.tf);
+  for(let i=0;i<9;i++)parts.push({e:["⭐","💖","✨"][i%3],x:p.x+(Math.random()-.5)*90,y:p.y-10,l:1.6});
+  leave(p);
+  showBox('<h3>🎉 ¡Paciente recuperada!</h3><p>'+p.e+' '+p.n+' vuelve a casa feliz.<br>'+"⭐".repeat(s)+' +'+gain+' 🪙 · +'+5*s+' s ⏱️<br>🏆 +'+pts+' pts'+(combo>1?'<br>🔥 Racha x'+combo+' (bonus +'+Math.round((mult-1)*100)+'%)':'')+'</p><div class="info">📚 <b>Lo aprendido:</b> '+p.c.df+' '+p.c.tf+'</div><button class="go" id="nx">Seguir</button>');
+  $("nx").onclick=()=>{hideBox();modal=false;check()};
+}
+function fail(p){
+  addMiss(p);loseHeart();leave(p);if(p.c.l>=3){grief(p,"los errores en su atención");return}
+  showBox('<h3>🚑 Hay que derivarla</h3><p>Demasiados errores. Era <b>'+p.c.d[0]+'</b>. La conducta correcta:<br><b>'+p.c.t[0]+'</b></p><div class="info">📚 '+p.c.tf+'</div><button class="go" id="nx">Seguir</button>');
+  $("nx").onclick=()=>{hideBox();modal=false;check()};
+}
+
+function timeUp(){clr();over=true;modal=true;lmsg="⏰ ¡Se acabó el tiempo en el nivel "+lvl+"! Se desató el caos en la sala.";lose()}
+function fx(){
+  const p=panic,a=p*(.55+.45*Math.sin(tm*(3+p*9))),c="rgba(230,30,30,"+a+")";
+  cv.style.transform=shake>0?"translateX("+Math.sin(tm*90)*7*shake+"px)":"";
+  cv.style.borderColor=p>0?"rgb(255,"+Math.round(255-190*a)+","+Math.round(255-190*a)+")":"";
+  cv.style.boxShadow=p>0?"0 0 "+(10+30*a)+"px "+(3+8*a)+"px "+c:"";
+  $("m").style.boxShadow=p>0?"inset 0 0 "+(30+70*p)+"px "+(5+20*p)+"px "+c:"";
+}
+function tmr(){const n=Math.ceil(T),t="⏱️ "+Math.floor(n/60)+":"+String(n%60).padStart(2,"0"),e=$("tk");if(e.textContent!=t)e.textContent=t;e.style.color=panic>.3?"#FFD166":""}
+/* ---------- Bucle ---------- */
+function upd(dt){
+  tm+=dt;shake=Math.max(0,shake-dt);hush=Math.max(0,hush-dt);parts=parts.filter(q=>(q.l-=dt)>0);parts.forEach(q=>q.y-=45*dt);
+  if(!over&&!inShop){T-=dt;if(T<=0){T=0;timeUp();return}}
+  panic=over?0:Math.max(0,Math.min(1,(.4-T/T0)/.4));
+  if(TR&&!over){TR.t+=dt;TR.p.tp=Math.min(1,TR.t/TR.d);if(TR.t>=TR.d){const p=TR.p;TR=null;win(p)}}
+  if(modal||over)return;
+  if(freeze>0)freeze-=dt;
+  spT-=dt;
+  if(spT<=0&&nxt<Q.length){
+    const fr=[0,1,2].filter(i=>!pats.some(q=>q.st=="wait"&&q.sp==i));
+    if(fr.length){const i=fr[0],a=AS[nxt%AS.length];pats.push({c:Q[nxt],i:nxt,e:/posparto|puerperal/i.test(Q[nxt].n)?a[2]:a[0],n:a[1],st:"wait",sp:i,x:SP[i].x,y:SP[i].y,pat:100,m:0});nxt++;if(lvl==1&&nxt==1&&!LS.get("me_tut",0))toast("❗ Llegó una paciente: acércate y presiona E, o tócala");spT=Math.max(7,15-lvl*1.5)}else spT=2;
+  }
+  const dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0),sp=180*(1+.25*perm.shoes);
+  if(dx||dy){P.tg=null;const l=Math.hypot(dx,dy);P.x+=dx/l*sp*dt;P.y+=dy/l*sp*dt}
+  else if(P.tg){const ex=P.tg.x-P.x,ey=P.tg.y-P.y,d=Math.hypot(ex,ey);
+    if(d<(P.tg.p?50:6)){const p=P.tg.p;P.tg=null;if(p)act(p)}else{P.x+=ex/d*sp*dt;P.y+=ey/d*sp*dt}}
+  P.x=Math.max(25,Math.min(775,P.x));P.y=Math.max(95,Math.min(435,P.y));
+  if(freeze<=0)pats.filter(q=>q.st=="wait").forEach(q=>{
+    q.pat-=dt*1.6*DP[dif]*(1+.2*(lvl-1))*(q.c.l>=3?1.3:1)*(perm.calm?.7:1);
+    if(q.pat<=0&&!over&&!modal){addMiss(q);loseHeart();if(q.c.l>=3){leave(q);grief(q,"esperar sin que nadie la atendiera");return}pats=pats.filter(x=>x!==q);done++;hud();no();toast(q.n+" se cansó de esperar 🕒");check()}
+  });
+}
+
+/* ---------- Dibujo ---------- */
+function rr(x,y,w,h,r,f,s){g.beginPath();g.roundRect(x,y,w,h,r);if(f){g.fillStyle=f;g.fill()}if(s){g.strokeStyle=s;g.lineWidth=3;g.stroke()}}
+function em(t,x,y,s){g.font=s+"px "+EM;g.textAlign="center";g.textBaseline="middle";g.fillStyle="#000";g.fillText(t,x,y)}
+function txt(t,x,y,s,c){g.font="bold "+s+"px Fredoka,'Trebuchet MS',sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillStyle=c;g.fillText(t,x,y)}
+function draw(){
+  g.setTransform(SC,0,0,SC,0,0);
+  const cols=["#FFE6EE","#DDF4EE","#E6ECFB"],xs=[0,260,530],ws=[260,270,270];
+  for(let r=0;r<3;r++){g.fillStyle=cols[r];g.fillRect(xs[r],60,ws[r],400);
+    g.fillStyle="rgba(255,255,255,.55)";
+    for(let i=0;i<ws[r]/40;i++)for(let j=0;j<10;j++)if((i+j)%2==0)g.fillRect(xs[r]+i*40,60+j*40,40,40)}
+  const gr=g.createLinearGradient(0,0,W,0);gr.addColorStop(0,"#FFD6E4");gr.addColorStop(.5,"#FFF3F7");gr.addColorStop(1,"#CDEFE6");
+  g.fillStyle=gr;g.fillRect(0,0,W,60);rr(0,52,W,8,0,"#F3C6D3");
+  txt("🏥 Recepción",130,30,18,"#3B2A4A");txt("🩺 Consultorio",395,30,18,"#3B2A4A");txt("👶 Sala de partos",665,30,18,"#3B2A4A");
+  g.fillStyle="#F3C6D3";[260,530].forEach(x=>{g.fillRect(x-4,60,8,130);g.fillRect(x-4,330,8,130)});
+  [130,395,665].forEach(x=>{rr(x-22,66,44,26,8,"#CDEBFF","#fff");em("☁️",x,79,16)});
+  rr(150,160,26,190,10,"#FFB3C6","#fff");em("🖥️",163,200,22);em("📋",163,260,20);
+  SP.forEach(s=>rr(s.x-32,s.y+22,64,16,8,"#CDB4DB"));
+  BED.forEach((b,i)=>{rr(b.x-58,b.y-14,116,66,14,"#fff","#C9B6E0");rr(b.x-52,b.y-8,32,26,10,"#FFC8DD");const oc=bed[i];em(oc?"💓":(i?"📈":"🧪"),b.x,b.y-60,oc?30+Math.sin(tm*8)*4:30)});
+  [[40,435],[775,435],[285,435],[505,435],[555,435]].forEach(([x,y])=>em("🪴",x,y,28));
+  em("🌷",230,110,22);em("🧸",30,110,26);em("🎀",300,110,20);em("🧸",760,110,22);
+  if(P&&P.tg&&!P.tg.p){g.strokeStyle="#FF8FAB";g.lineWidth=3;g.beginPath();g.arc(P.tg.x,P.tg.y,10+Math.sin(tm*8)*2,0,7);g.stroke()}
+  if(!P)return;
+  const list=[...pats.map(p=>({y:p.y,f:()=>drawPat(p)})),{y:P.y,f:drawPlayer}].sort((a,b)=>a.y-b.y);
+  list.forEach(o=>o.f());
+  parts.forEach(q=>{g.globalAlpha=Math.min(1,q.l);if(q.s)txt(q.s,q.x,q.y,q.z||18,q.c||"#2E8B57");else em(q.e,q.x,q.y,24)});g.globalAlpha=1;
+  if(freeze>0){g.fillStyle="rgba(120,180,255,.12)";g.fillRect(0,60,W,400);txt("⏳ "+Math.ceil(freeze)+" s",W/2,80,16,"#3B2A4A")}
+  {const vg=g.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,W*.75);vg.addColorStop(0,"rgba(60,30,80,0)");vg.addColorStop(1,"rgba(60,30,80,.16)");g.fillStyle=vg;g.fillRect(0,0,W,H)}
+  if(panic>0){const v=g.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,W*.62),a=panic*(.55+.45*Math.sin(tm*(3+panic*9)));v.addColorStop(0,"rgba(255,0,0,0)");v.addColorStop(1,"rgba(220,20,20,"+.55*a+")");g.fillStyle=v;g.fillRect(0,0,W,H)}
+}
+function drawPat(p){
+  const bob=Math.sin(tm*4+p.i)*2;
+  g.fillStyle="rgba(0,0,0,.12)";g.beginPath();g.ellipse(p.x,p.y+24,22,7,0,0,7);g.fill();
+  em(p.e,p.x,p.y+bob,44);
+  txt(p.n,p.x,p.y+34,12,"#3B2A4A");
+  rr(p.x-16,p.y-52+bob,32,24,10,"#fff",p.c.l>=3?"#E66":"#FF8FAB");em(p.st=="wait"?(p.c.l>=3?"🚨":"❗"):"🩺",p.x,p.y-40+bob,16);
+  if(p.st=="treat"){
+    const w=70,x=p.x-w/2,y=p.y-74+bob;
+    txt("💊 Tratando…",p.x,y-11,12,"#3B2A4A");
+    rr(x,y,w,10,5,"#E3EDE6","#fff");rr(x,y,Math.max(8,w*p.tp),10,5,"#4CB56F");
+  }
+  if(p.st=="wait"){rr(p.x-24,p.y+44,48,6,3,"#E8D6DE");rr(p.x-24,p.y+44,48*Math.max(0,p.pat/100),6,3,p.pat>30?"#6BCB77":"#FF6B6B")}
+}
+function drawPlayer(){
+  const bob=Math.sin(tm*6)*(P.tg||keys.w||keys.a||keys.s||keys.d?2:0.5);
+  g.fillStyle="rgba(0,0,0,.12)";g.beginPath();g.ellipse(P.x,P.y+24,24,7,0,0,7);g.fill();
+  em("👩🏽‍⚕️",P.x+(panic>.3?Math.sin(tm*40)*2*panic:0),P.y+bob,46);
+  if(panic>.5)em("😱",P.x+26,P.y-26+bob,22);
+}
+
+/* ---------- Entrada ---------- */
+cv.addEventListener("click",e=>{
+  if(modal||over)return;
+  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;
+  const p=pats.find(q=>Math.hypot(q.x-x,q.y-y)<40);
+  P.tg=p?{x:p.x,y:p.y+40,p}:{x,y};
+});
+addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();keys[k]=true;
+  if(k=="e"&&!modal&&!over){const p=pats.find(q=>Math.hypot(q.x-P.x,q.y-P.y)<80);if(p)act(p)}
+  if(k=="t")useTime();
+  if(modal&&/^[1-4]$/.test(k)){const bb=[...document.querySelectorAll("#ol .o.ch")][+k-1];if(bb&&!bb.disabled)bb.click()}
+  if(k.startsWith("arrow")&&!modal)e.preventDefault();
+});
+addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+$("bs").onclick=()=>{if(!modal&&!over)shop(()=>{hideBox();modal=false})};
+$("bt").onclick=useTime;
+$("bg").onclick=()=>{if(!over&&$("gd").classList.contains("hide"))guide()};
+$("bm").onclick=()=>{mute=!mute;$("bm").textContent=mute?"🔇":"🎵";if(!mute)music()};
+let last=0;
+function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;upd(dt);draw();fx();tmr();requestAnimationFrame(loop)}
+function fit(){
+  const r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1,sc=Math.min(6,Math.max(1.5,d*r.width/W)),nw=Math.round(W*sc),nh=Math.round(H*sc);
+  if(cv.width!=nw||cv.height!=nh){SC=sc;cv.width=nw;cv.height=nh}
+  g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";
+}
+fit();if(window.ResizeObserver)new ResizeObserver(fit).observe(cv);addEventListener("resize",fit);
+if(window.visualViewport)visualViewport.addEventListener("resize",fit);
+hud();intro();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
